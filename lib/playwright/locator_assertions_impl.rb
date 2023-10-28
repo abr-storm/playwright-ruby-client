@@ -44,7 +44,8 @@ module Playwright
             "\n#{message}"
           end
 
-          raise RuntimeError.new("#{out_message}\nActual value #{actual} #{log}")
+          out = "#{out_message}\nActual value #{actual} #{log}"
+          raise AssertionError.new(out)
       else
         true
       end

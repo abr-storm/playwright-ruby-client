@@ -64,7 +64,7 @@ module Playwright
       regex = JavaScript::Regex.new(pattern)
       expected = {
         regexSource: regex.source,
-        regexFlags: regex.flags,
+        regexFlags: regex.flag,
         matchSubstring: match_substring,
         normalizeWhiteSpace: normalize_white_space,
         ignoreCase: ignore_case
@@ -92,7 +92,7 @@ module Playwright
               matchSubstring: match_substring,
               normalizeWhiteSpace: normalize_white_space,
             }
-          elsif item.is_a?(Pattern)
+          elsif item.is_a?(Regexp)
             expected_regex(item, match_substring, normalize_white_space, ignore_case)
           end
       end
@@ -176,6 +176,7 @@ module Playwright
             expectedText: expected_text,
             timeout:,
           },
+          expected,
           "Locator expected to have class"
         )
       end
@@ -195,7 +196,7 @@ module Playwright
     end
     define_negation :to_have_count
 
-    def to_have_css(name, value, timeout)
+    def to_have_css(name, value, timeout: nil)
       expected_text = to_expected_text_values([value])
       expect_impl(
         "to.have.css",

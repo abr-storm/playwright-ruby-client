@@ -490,9 +490,9 @@ module Playwright
     end
 
     def expect(expression, options)
-      if options.key? :expected_value
-        options[:expected_value] = JavaScript::ValueSerializer
-          .new(options[:expected_value])
+      if options.key? :expectedValue
+        options[:expectedValue] = JavaScript::ValueSerializer
+          .new(options[:expectedValue])
           .serialize
       end
 

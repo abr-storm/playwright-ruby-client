@@ -3,7 +3,7 @@ require "playwright/test"
 
 # ref: https://github.com/microsoft/playwright-python/blob/main/tests/sync/test_assertions.py
 RSpec.describe Playwright::LocatorAssertions, sinatra: true do
-  include Playwright::Test::RSpec
+  include Playwright::Test::Matchers
 
   it "should work with #to_contain_text" do
     with_page do |page|
@@ -318,6 +318,31 @@ RSpec.describe Playwright::LocatorAssertions, sinatra: true do
         rescue RSpec::Expectations::ExpectationNotMetError => e
           expect(e.full_message).to include("not expected to have text")
         end
+      end
+    end
+
+    it "should be able to serialize regex correctly" do
+      with_page do |page|
+        page.goto(server_empty_page)
+        page.set_content("<div>iGnOrEcAsE</div>")
+        expect(page.locator("div")).to have_text(/ignorecase/i)
+
+        page.set_content(<<~HTML)
+          <div>start
+
+          some
+          lines
+          between
+          end</div>
+        HTML
+        expect(page.locator("div")).to have_text(/start.*end/m)
+
+        page.set_content(<<~HTML)
+          <div>line1
+          line2
+          line3</div>
+        HTML
+        expect(page.locator("div")).to have_text(/^line2$/m)
       end
     end
   end
@@ -675,4 +700,132 @@ RSpec.describe Playwright::LocatorAssertions, sinatra: true do
     end
   end
 
+  describe "#to_be_editable" do
+    it "should work" do
+      with_page do |page|
+        page.goto(server_empty_page)
+        page.set_content("<input></input><button disabled>Text</button>")
+        expect(page.locator("button")).to not_be_editable
+        expect(page.locator("input")).to be_editable
+        expect {
+          expect(page.locator("button")).to be_editable(timeout: 100)
+        }.to raise_error(RSpec::Expectations::ExpectationNotMetError)
+      end
+    end
+
+    it "should work with true" do
+      with_page do |page|
+        page.set_content("<input></input>")
+        expect(page.locator("input")).to be_editable(editable: true)
+      end
+    end
+
+    it "should work with false" do
+      with_page do |page|
+        page.set_content("<input readonly></input>")
+        expect(page.locator("input")).to be_editable(editable: false)
+      end
+    end
+
+    it "should work with not and false" do
+      with_page do |page|
+        page.set_content("<input></input>")
+        expect(page.locator("input")).to not_be_editable(editable: false)
+      end
+    end
+  end
+
+  it "should work with #to_be_empty" do
+    with_page do |page|
+      page.goto(server_empty_page)
+      page.set_content("<input value=text name=input1></input><input name=input2></input>")
+      expect(page.locator("input[name=input1]")).to not_be_empty
+      expect(page.locator("input[name=input2]")).to be_empty
+      expect {
+        expect(page.locator("input[name=input1]")).to be_empty(timeout: 100)
+      }
+    end
+  end
+
+  it "should work with #to_be_focused" do
+    with_page do |page|
+      page.goto(server_empty_page)
+      page.set_content("<input type=checkbox>")
+      my_checkbox = page.locator("input")
+      expect {
+        expect(my_checkbox).to be_focused(timeout: 100)
+      }
+      my_checkbox.focus()
+      expect(my_checkbox).to be_focused
+    end
+  end
+
+  it "should work with #to_be_hidden / #to_be_visible" do
+    with_page do |page|
+      page.goto(server_empty_page)
+      page.set_content("<div style='width: 50px; height: 50px;'>Something</div>")
+      my_checkbox = page.locator("div")
+      expect(my_checkbox).to be_visible
+      expect {
+        expect(my_checkbox).to be_hidden(timeout: 100)
+      }.to raise_error(RSpec::Expectations::ExpectationNotMetError)
+
+      my_checkbox.evaluate("e => e.style.display = 'none'")
+      expect(my_checkbox).to be_hidden
+
+      expect {
+        expect(my_checkbox).to be_visible(timeout: 100)
+      }.to raise_error(RSpec::Expectations::ExpectationNotMetError)
+    end
+  end
+
+  describe "#to_be_visible" do
+    it "should work with true" do
+      with_page do |page|
+        page.set_content("<button>hello</button")
+        expect(page.locator("button")).to be_visible(visible: true)
+      end
+    end
+
+    it "should work with false" do
+      with_page do |page|
+        page.set_content("<button hidden>hello</button")
+        expect(page.locator("button")).to be_visible(visible: false)
+      end
+    end
+
+    it "should work with not and false" do
+      with_page do |page|
+        page.set_content("<button>hello</button")
+        expect(page.locator("button")).to not_be_visible(visible: false)
+      end
+    end
+
+    it "should work eventually" do
+      with_page do |page|
+        page.set_content("<div></div>")
+        page.eval_on_selector("div", <<~JS)
+          div => setTimeout(() => {
+            div.innerHTML = '<span>Hello</span>'
+          }, 700)
+        JS
+        expect(page.locator("span")).to be_visible
+      end
+    end
+
+    it "should work eventually with not" do
+      with_page do |page|
+        page.set_content("<div><span>Hello</span></div>")
+        page.eval_on_selector("span", <<~JS)
+          span => setTimeout(() => {
+            span.textContent = ''
+          }, 700)
+        JS
+
+        expect(page.locator("span")).to not_be_visible
+      end
+    end
+  end
+
+  
 end

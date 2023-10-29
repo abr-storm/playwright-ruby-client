@@ -24,7 +24,7 @@ module Playwright
       end
     end
 
-    module RSpec
+    module Matchers
       class PlaywrightMatcher
         def initialize(expectation_method, *args, **kwargs)
           @method = expectation_method
@@ -60,8 +60,8 @@ module Playwright
         # to_be_visible => be_visible
         # not_to_be_visible => not_be_visible
         root_method_name = method_name.gsub("to_", "")
-        RSpec.define_method(root_method_name) do |*args, **kwargs| 
-          RSpec::PlaywrightMatcher.new(method_name, *args, **kwargs)
+        Matchers.define_method(root_method_name) do |*args, **kwargs| 
+          Matchers::PlaywrightMatcher.new(method_name, *args, **kwargs)
         end
       end
   end

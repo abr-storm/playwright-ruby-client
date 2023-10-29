@@ -18,6 +18,7 @@ module Playwright
       expect_options[:timeout] ||= 5000
       expect_options[:isNot] = @is_not
       message.gsub!("expected to", "not expected to") if @is_not
+      expect_options.delete(:useInnerText) if expect_options.key?(:useInnerText) && expect_options[:useInnerText].nil?
 
       result = @locator.expect(expression, expect_options)
 
@@ -69,7 +70,7 @@ module Playwright
         normalizeWhiteSpace: normalize_white_space,
         ignoreCase: ignore_case
       }
-      expected.delete(:ignoreCase) unless ignore_case
+      expected.delete(:ignoreCase) if ignore_case.nil?
 
       expected
     end
@@ -274,6 +275,7 @@ module Playwright
         expected_text = to_expected_text_values(
           expected,
           true,
+          true,
           ignoreCase,
         )
         expect_impl(
@@ -287,7 +289,12 @@ module Playwright
           "Locator expected to have text"
         )
       else
-        expected_text = to_expected_text_values([expected], true, ignoreCase)
+        expected_text = to_expected_text_values(
+          [expected],
+          true,
+          true,
+          ignoreCase,
+        )
         expect_impl(
           "to.have.text",
           {

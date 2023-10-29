@@ -7,13 +7,22 @@ sidebar_position: 10
 
 The [LocatorAssertions](./locator_assertions) class provides assertion methods that can be used to make assertions about the [Locator](./locator) state in the tests.
 
-```python sync title=example_eff0600f575bf375d7372280ca8e6dfc51d927ced49fbcb75408c894b9e0564e.py
-from playwright.sync_api import Page, expect
+```ruby sync title=example_eff0600f575bf375d7372280ca8e6dfc51d927ced49fbcb75408c894b9e0564e.py
+require "playwright/test"
 
-def test_status_becomes_submitted(page: Page) -> None:
-    # ..
-    page.get_by_role("button").click()
-    expect(page.locator(".status")).to_have_text("Submitted")
+# Every locator assertion has a corresponding matcher. For example:
+#
+# to_be_visible => expect(my_locator).to be_visible
+# not_to_be_visible => expect(my_locator).to not_be_visible
+
+RSpec.describe "My feature", type: :feature do
+  include Playwright::Test::Matchers
+
+  it "changes the status to submitted" do
+    page.get_by_role("button").click
+    expect(page.locator(".status")).to have_text("Submitted")
+  end
+end
 
 ```
 

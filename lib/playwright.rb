@@ -35,6 +35,8 @@ require 'playwright/playwright_api'
 # load generated files
 Dir[File.join(__dir__, 'playwright_api', '*.rb')].each { |f| require f }
 
+require 'playwright/test'
+
 module Playwright
   class Execution
     def initialize(connection, playwright, browser = nil)

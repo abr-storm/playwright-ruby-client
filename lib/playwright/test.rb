@@ -1,5 +1,3 @@
-require "playwright"
-
 module Playwright
   # this module is responsible for running playwright assertions and integrating
   # with test frameworks.
@@ -12,8 +10,8 @@ module Playwright
 
       def call(actual, message = nil)
         if actual.is_a?(Locator)
-          ::Playwright::LocatorAssertions.new(
-            ::Playwright::LocatorAssertionsImpl.new(
+          LocatorAssertions.new(
+            LocatorAssertionsImpl.new(
               actual,
               @timeout_settings.timeout,
               false,
@@ -54,7 +52,7 @@ module Playwright
       end
     end
 
-    ALL_ASSERTIONS = ::Playwright::LocatorAssertions.instance_methods(false)
+    ALL_ASSERTIONS = LocatorAssertions.instance_methods(false)
 
     ALL_ASSERTIONS
       .map(&:to_s)

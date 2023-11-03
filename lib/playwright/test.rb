@@ -10,8 +10,8 @@ module Playwright
 
       def call(actual, message = nil)
         if actual.is_a?(Locator)
-          LocatorAssertions.new(
-            LocatorAssertionsImpl.new(
+          ::Playwright::LocatorAssertions.new(
+            ::Playwright::LocatorAssertionsImpl.new(
               actual,
               @timeout_settings.timeout,
               false,

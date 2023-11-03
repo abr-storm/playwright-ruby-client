@@ -1,3 +1,5 @@
+require "playwright"
+
 module Playwright
   # this module is responsible for running playwright assertions and integrating
   # with test frameworks.

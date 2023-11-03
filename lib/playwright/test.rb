@@ -52,7 +52,7 @@ module Playwright
       end
     end
 
-    ALL_ASSERTIONS = LocatorAssertions.instance_methods(false)
+    ALL_ASSERTIONS = ::Playwright::LocatorAssertions.instance_methods(false)
 
     ALL_ASSERTIONS
       .map(&:to_s)
